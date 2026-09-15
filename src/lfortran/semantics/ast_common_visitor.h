@@ -2975,7 +2975,7 @@ public:
 	ASR::symbol_t *get_sym = current_scope->get_symbol(sym);
 	// get actual variable from SymTab, not the current line
 	if (get_sym == nullptr) {
-	    if (compiler_options.implicit_typing) {
+	    if (compiler_options.implicit_typing && implicit_dictionary[std::string(1, sym[0])] != nullptr) {
 		ASR::intentType intent;
 		if (is_proc_arg) {
 		    intent = ASRUtils::intent_unspecified;
