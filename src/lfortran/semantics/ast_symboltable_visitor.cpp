@@ -441,6 +441,22 @@ public:
                 }
             }
         }
+        // A bare `private` statement sets the default accessibility of the
+        // whole specification part, not only of the declarations that follow
+        // it (F2018 8.6.1), so apply it before visiting any declaration, the
+        // same way `use` and `implicit` statements are processed above.
+        // Otherwise a variable, derived type or interface declared ahead of
+        // the statement would take the initial (public) default.
+        for (size_t i=0; i<x.n_items; i++) {
+            if (!AST::is_a<AST::Declaration_t>(*x.m_items[i])) continue;
+            AST::Declaration_t *d = AST::down_cast<AST::Declaration_t>(x.m_items[i]);
+            if (d->m_vartype != nullptr || d->n_syms != 0 || d->n_attributes != 1
+                    || !AST::is_a<AST::SimpleAttribute_t>(*d->m_attributes[0])) continue;
+            AST::SimpleAttribute_t *sa = AST::down_cast<AST::SimpleAttribute_t>(d->m_attributes[0]);
+            if (sa->m_attr == AST::simple_attributeType::AttrPrivate) {
+                dflt_access = ASR::accessType::Private;
+            }
+        }
         for (size_t i=0; i<x.n_items; i++) {
             if (!AST::is_kind(*x.m_items[i], AST::DeclStmtKind::Declaration)) continue;
             try {
